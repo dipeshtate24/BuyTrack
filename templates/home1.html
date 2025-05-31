@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Scraping</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #fcfcfc;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .main-header h2 {
+            margin-top: 40px;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        .input-container form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-box input {
+            width: 200px;
+            height: 50px;
+            font-size: 1em;
+            padding-left: 15px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .input-box label {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: #555;
+            transition: 0.15s ease-in-out;
+        }
+
+        .input-box .input-field:focus {
+            border: 2px solid #8749F2;
+        }
+
+        .input-field:focus ~ label,
+        .input-field:valid ~ label {
+            top: -8px;
+            left: 12px;
+            font-size: 12px;
+            color: #7931F5;
+            background: #FFF;
+            padding: 0 5px;
+        }
+
+        button {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-block;
+            font-weight: bold;
+            padding: 0.7em 2em;
+            border: 3px solid #80669d;
+            border-radius: 2px;
+            background: white;
+            color: #80669d;
+            cursor: pointer;
+            transition: 0.3s ease all;
+            position: relative;
+            z-index: 1;
+        }
+
+        button:before {
+            transition: 0.5s all ease;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            right: 50%;
+            bottom: 0;
+            opacity: 0;
+            content: '';
+            background-color: #80669d;
+            z-index: -1;
+        }
+
+        button:hover,
+        button:focus {
+            color: white;
+        }
+
+        button:hover:before,
+        button:focus:before {
+            left: 0;
+            right: 0;
+            opacity: 1;
+        }
+
+        .img-text-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tables-wrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            overflow-x: auto;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            background: #999;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            flex: 1;
+            min-width: 350px;
+            max-width: 600px;
+        }
+
+        .title h3 {
+            margin-bottom: 10px;
+        }
+
+        .title table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            color: black;
+            border-radius: 10px;
+            overflow: auto;
+            display: block;
+            max-height: 300px;
+        }
+
+        .title table thead {
+            position: sticky;
+            top: 0;
+            background: #eee;
+        }
+
+        .title table th,
+        .title table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            min-width: 100px;
+        }
+
+        .button-submit {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .submit-button,
+        .translate-button {
+            color: white;
+            background: #80669d;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            width: 150px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            cursor: pointer;
+        }
+
+        .submit-button:hover,
+        .translate-button:hover {
+            background: #999;
+        }
+
+        a.go-home {
+            color: #80669d;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .tables-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .input-container form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .input-box input {
+                width: 100%;
+            }
+
+            .title table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="main-header">
+        <h2>Web Scraping</h2>
+    </div>
+    <div class="input-container">
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <div class="input-box">
+                <input type="text" class="input-field" id="amazon_product_id" name="amazon_product_id" required>
+                <label for="amazon_product_id">Amazon</label>
+            </div>
+            <div class="input-box">
+                <input type="text" class="input-field" id="flipkart_product_id" name="flipkart_product_id" required>
+                <label for="flipkart_product_id">Flipkart</label>
+            </div>
+            <div class="input-box">
+                <button type="submit">Start Scraping</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="img-text-container">
+        <div class="tables-wrapper">
+
+            <!-- Amazon Section -->
+            <div class="title">
+                <h3>Amazon Product</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Product ID</th>
+                        <th>Price</th>
+                        <th>View By</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for record in scraped_data if record['Website'] == 'Amazon' %}
+                    <tr>
+                        <td>{{ record['Timestamp'] }}</td>
+                        <td>{{ record['Product ID'] }}</td>
+                        <td>{{ record['Price'] }}</td>
+                        <td><pre>{{ record['Scrape'] }}</pre></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Flipkart Section -->
+            <div class="title">
+                <h3>Flipkart Product</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Product ID</th>
+                        <th>Price</th>
+                        <th>View By</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for record in scraped_data if record['Website'] == 'Flipkart' %}
+                    <tr>
+                        <td>{{ record['Timestamp'] }}</td>
+                        <td>{{ record['Product ID'] }}</td>
+                        <td>{{ record['Price'] }}</td>
+                        <td><pre>{{ record['Scrape'] }}</pre></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="button-submit">
+            <form action="/download_excel">
+                <button type="submit">Download Excel</button>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <form method="post" action="/stop_scrape">
+            <button type="submit">Stop Scraping</button>
+        </form>
+    </div>
+
+    <div>
+        <a class="go-home" href="/back_to_homepage">Go back to homepage</a>
+    </div>
+</div>
+</body>
+</html>

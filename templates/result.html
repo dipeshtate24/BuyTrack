@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Prediction</title>
+    <style>
+        body
+        {
+            background-image: url({{url_for('static',filename ='2.jpg')}});
+        }
+    </style>
+</head>
+<body>
+     <center>
+         <h1>Task Prediction</h1>
+         <h3 style="color:black;">{{Prediction_Tasks}}</h3>
+         <h4>Task Name: {{Task_Name}}</h4>
+         <h4>Task Description:{{Task_Description}}</h4>
+         <a href="/">Go back to homepage</a>
+     </center>
+
+</body>
+</html>

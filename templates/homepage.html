@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Scraper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background: #fcfcfc;
+            padding: 20px;
+        }
+
+        #count {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .main-header h2 {
+            margin-top: 40px;
+            font-size: 30px;
+            text-align: center;
+        }
+
+        .input-container form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-box input {
+            width: 200px;
+            height: 50px;
+            font-size: 1em;
+            padding-left: 15px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            outline: none;
+            text-align: center;
+        }
+
+        .input-box label {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            font-size: 1em;
+            color: #999;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .input-box input:focus + label,
+        .input-box input:valid + label {
+            top: -10px;
+            left: 10px;
+            font-size: 0.8em;
+            background: white;
+            padding: 0 5px;
+            color: #80669d;
+        }
+
+        button {
+            font-size: 12px;
+            padding: 0.7em 2em;
+            border: 3px solid #80669d;
+            border-radius: 2px;
+            background: white;
+            color: #80669d;
+            cursor: pointer;
+            transition: 0.3s ease all;
+            position: relative;
+            z-index: 1;
+        }
+
+        button:hover {
+            background-color: #80669d;
+            color: white;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding-top: 50px;
+        }
+
+        .collapsible {
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .collapsible input {
+            display: none;
+        }
+
+        .collapsible label {
+            position: relative;
+            font-weight: 600;
+            background: #999;
+            color: #1c1c6b;
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 5px 11px 0 rgba(0, 0, 0, .1), 0 4px 11px 0 rgba(0, 0, 0, .08);
+        }
+
+        .collapsible label:after {
+            content: "";
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 18px;
+            height: 18px;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M9 18l6-6-6-6'/></svg>");
+            background-repeat: no-repeat;
+            background-size: contain;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible input:checked + label:after {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-text {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .collapsible input:checked ~ .collapsible-text {
+            max-height: 100px;
+            opacity: 1;
+            padding-bottom: 25px;
+            background: #999;
+            box-shadow: 0 5px 11px 0 rgba(0, 0, 0, .1), 0 4px 11px 0 rgba(0, 0, 0, .08);
+        }
+
+        .collapsible-text h2 {
+            margin-bottom: 10px;
+            padding: 15px 15px 0;
+            color: #1c1c6b;
+        }
+
+        .table-section {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .table-wrapper {
+            max-height: 300px;
+            overflow-y: scroll;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: max-content;
+            margin-top: 10px;
+            border-spacing: 0px;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: center;
+            position: sticky;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        .outer-wrapper {
+            border: 1px solid black;
+            box-shadow: 0px 0px 3px black;
+            margin: 20px;
+            border-radius: 5px;
+            max-width: fit-content;
+        }
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="main-header">
+        <h2>Product Scraper</h2>
+    </div>
+
+    <div class="input-container">
+        <form method="POST" action="/" enctype="multipart/form-data">
+            <div class="input-box">
+                <input type="text" id="amazon_id" name="amazon_id" required>
+                <label for="amazon_id">Amazon Product ID</label>
+            </div>
+            <div class="input-box">
+                <input type="text" id="flipkart_id" name="flipkart_id" required>
+                <label for="flipkart_id">Flipkart Product ID</label>
+            </div>
+            <select name="Minutes" id="count">
+                <option value="1" selected>1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+            </select>
+            <div class="input-box">
+                <button type="submit">Start Scraping</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="wrapper">
+        {% if amazon_data %}
+        <div class="collapsible">
+            <input type="checkbox" id="amazon_collapsible">
+            <label for="amazon_collapsible">Product Title: {{ amazon_data['title'] }}</label>
+            <div class="collapsible-text">
+                <h2>Amazon Details Available Below</h2>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if amazon_data or flipkart_data %}
+
+    <!-- Tables outside .wrapper -->
+    {% if amazon_data %}
+    <div class="table-section">
+        <div class="product-title">Amazon Product Details</div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Rating</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in amazon_data['history'] %}
+                <tr>
+                    <td>{{ record['date'] }}</td>
+                    <td>{{ record['time'] }}</td>
+                    <td>{{ record['price'] }}</td>
+                    <td>{{ record['rating'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if flipkart_data %}
+    <div class="table-section">
+        <div class="product-title">Flipkart Product Details</div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Rating</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for record in flipkart_data['history'] %}
+                <tr>
+                    <td>{{ record['date'] }}</td>
+                    <td>{{ record['time'] }}</td>
+                    <td>{{ record['price'] }}</td>
+                    <td>{{ record['rating'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    <div class="button-submit">
+            <form action="/download_excel">
+                <button type="submit">Download Excel</button>
+            </form>
+    </div>
+    {% endif %}
+
+</div>
+</body>
+</html>

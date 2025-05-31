@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Crawler</title>
+    {% if first_scrape and not second_scrape %}
+        <meta http-equiv="refresh" content="60"> <!-- Refresh every 60 seconds -->
+    {% endif %}
+</head>
+<body>
+    <h2>Enter Product ID</h2>
+    <form method="POST">
+        <input type="text" name="website_name" placeholder="amazon / flipkart" required>
+        <input type="text" name="product_id" placeholder="Enter Product ID" required>
+        <button type="submit">Fetch Product</button>
+    </form>
+
+    {% if first_scrape %}
+        <h3>First Scrape (Now)</h3>
+        {% if first_scrape.error %}
+            <p style="color:red;">Error: {{ first_scrape.error }}</p>
+        {% else %}
+            <p><strong>Title:</strong> {{ first_scrape.title }}</p>
+            <p><strong>Price:</strong> {{ first_scrape.price }}</p>
+            <p><strong>Rating:</strong> {{ first_scrape.rating }}</p>
+        {% endif %}
+    {% endif %}
+
+    {% if second_scrape %}
+        <h3>Second Scrape (After 15 mins)</h3>
+        {% if second_scrape.error %}
+            <p style="color:red;">Error: {{ second_scrape.error }}</p>
+        {% else %}
+            <p><strong>Title:</strong> {{ second_scrape.title }}</p>
+            <p><strong>Price:</strong> {{ second_scrape.price }}</p>
+            <p><strong>Rating:</strong> {{ second_scrape.rating }}</p>
+        {% endif %}
+    {% elif first_scrape %}
+        <p style="color:gray;">Second scrape will be available after 15 minutes. Auto-refresh is enabled.</p>
+    {% endif %}
+</body>
+</html>
