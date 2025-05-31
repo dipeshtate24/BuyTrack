@@ -19,7 +19,7 @@ def get_amazon_product_details(product_id):
     options.add_argument("user-agent=Mozilla/5.0")
 
     # Set ChromeDriver path (update this)
-    service = Service(executable_path="C:/Users/Dipesh/PycharmProjects/PythonProject/Web_scrapping/chromedriver-win64"
+    service = Service(executable_path="/chromedriver-win64"
                                       "/chromedriver-win64/chromedriver.exe")  # <-- CHANGE THIS
     driver = webdriver.Chrome(service=service, options=options)
 
