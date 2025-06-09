@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_file, url_for, session
+from flask import Flask, render_template, request, redirect, send_file
 from amazon_product import get_amazon_product_details as ap
 import json
 import os
@@ -14,9 +14,7 @@ DATA_FILES = {
     'amazon': 'scraped_data_amazon.json'
 }
 
-
 # ------------------- Persistent Storage -------------------
-
 def load_data(site):
     if os.path.exists(DATA_FILES[site]):
         with open(DATA_FILES[site], 'r') as f:
@@ -38,25 +36,31 @@ def continuous_scraper(amazon_id, timer):
         timestamp_date = now.strftime("%Y-%m-%d")
         timestamp_time = now.strftime("%H:%M")
 
-        scrape, _ = ap(amazon_id)
-        entry = {
-            "date": timestamp_date,
-            "time": timestamp_time,
-            "price": scrape.get("price"),
-            "rating": scrape.get("rating")
-        }
-        if amazon_id not in scraped_data['amazon']:
-            scraped_data['amazon'][amazon_id] = {
-                "history": [],
-                "title": scrape.get("title", "")
+        try:
+            scrape, _ = ap(amazon_id)
+            entry = {
+                "date": timestamp_date,
+                "time": timestamp_time,
+                "price": scrape.get("price"),
+                "rating": scrape.get("rating"),
+                "img": scrape.get("img")
             }
-        scraped_data['amazon'][amazon_id]["history"].append(entry)
-        save_data(scraped_data['amazon'], 'amazon')
 
-        save_to_excel()
+            if amazon_id not in scraped_data['amazon']:
+                scraped_data['amazon'][amazon_id] = {
+                    "history": [],
+                    "title": scrape.get("title", "")
+                }
+
+            scraped_data['amazon'][amazon_id]["history"].append(entry)
+            save_data(scraped_data['amazon'], 'amazon')
+            save_to_excel()
+        except Exception as e:
+            print(f"[ERROR] Background scraper failed for {amazon_id}: {e}")
+
         time.sleep(timer * 60)
 
-# ----------------- Save to Excel ------------------
+# ----------------- Save to Excel for all products ------------------
 def save_to_excel():
     site = 'amazon'
     json_file = DATA_FILES[site]
@@ -66,20 +70,24 @@ def save_to_excel():
             data = json.load(f)
 
         for amazon_id, pdata in data.items():
-            records = []
-            for entry in pdata.get("history", []):
-                records.append({
-                    "product_id": amazon_id,
-                    "title": pdata.get("title", ""),
-                    "date": entry.get("date", ""),
-                    "time": entry.get("time", ""),
-                    "price": entry.get("price", ""),
-                })
+            try:
+                records = []
+                for entry in pdata.get("history", []):
+                    records.append({
+                        "product_id": amazon_id,
+                        "title": pdata.get("title", ""),
+                        "date": entry.get("date", ""),
+                        "time": entry.get("time", ""),
+                        "price": entry.get("price", ""),
+                        "rating": entry.get("rating", "")
+                    })
 
-            if records:
-                df = pd.DataFrame(records)
-                file_path = f"{amazon_id}_data_amazon.xlsx"
-                df.to_excel(file_path, index=False)
+                if records:
+                    df = pd.DataFrame(records)
+                    file_path = f"{amazon_id}_data_amazon.xlsx"
+                    df.to_excel(file_path, index=False)
+            except Exception as e:
+                print(f"[ERROR] Saving Excel failed for {amazon_id}: {e}")
 
 # ------------------- Controller -------------------
 def choose_amazon_product(amazon_id, timer):
@@ -87,69 +95,69 @@ def choose_amazon_product(amazon_id, timer):
     timestamp_date = now.strftime("%Y-%m-%d")
     timestamp_time = now.strftime("%H:%M")
 
-    if amazon_id not in scraped_data['amazon']:
-        scrap, _ = ap(amazon_id)
-        scraped_data['amazon'][amazon_id] = {
-            "history": [{
-                "date": timestamp_date,
-                "time": timestamp_time,
-                "price": scrap.get("price"),
-            }],
-            "title": scrap.get("title", ""),
-            "rating": scrap.get("rating"),
-            "img": scrap.get("img")
-        }
-        save_data(scraped_data['amazon'], 'amazon')
+    try:
+        if amazon_id not in scraped_data['amazon']:
+            scrape, _ = ap(amazon_id)
+            scraped_data['amazon'][amazon_id] = {
+                "history": [{
+                    "date": timestamp_date,
+                    "time": timestamp_time,
+                    "price": scrape.get("price")
+                }],
+                "title": scrape.get("title", ""),
+                "img": scrape.get("img", ""),
+                "rating": scrape.get("rating", "")
+            }
+            save_data(scraped_data['amazon'], 'amazon')
 
-    thread = threading.Thread(target=continuous_scraper, args=(amazon_id, int(timer)), daemon=True)
-    thread.start()
+        thread = threading.Thread(target=continuous_scraper, args=(amazon_id, int(timer)), daemon=True)
+        thread.start()
+    except Exception as e:
+        print(f"[ERROR] Choosing Amazon product failed: {e}")
 
 # ------------------- Routes -------------------
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    amazon_id = request.args.get('amazon_id')
+    amazon_id_param = request.args.get('amazon_id')
     timer = request.args.get('count') or 1
     amazon_data = {}
 
     if request.method == 'POST':
-        amazon_id = request.form.get('amazon_id')
+        amazon_id_input = request.form.get('amazon_id')
         timer = request.form.get('Minutes') or 1
 
-        amazon_ids = [aid.strip() for aid in amazon_id.split(',') if aid.strip()]
+        amazon_ids = [aid.strip() for aid in amazon_id_input.split(',') if aid.strip()]
         for aid in amazon_ids:
             choose_amazon_product(aid, timer)
 
-        return redirect(f"/?amazon_id={amazon_id}&count={timer}")
+        return redirect(f"/?amazon_id={amazon_id_input}&count={timer}")
 
-    if amazon_id:
-        amazon_ids = [aid.strip() for aid in amazon_id.split(',') if aid.strip()]
+    if amazon_id_param:
+        amazon_ids = [aid.strip() for aid in amazon_id_param.split(',') if aid.strip()]
         for aid in amazon_ids:
             amazon_data[aid] = scraped_data['amazon'].get(aid)
 
-    return render_template('file.html',
-                           amazon_data=amazon_data,
-                           amazon_id=amazon_id)
-
+    try:
+        return render_template('file.html',
+                               amazon_data=amazon_data,
+                               amazon_id=amazon_id_param)
+    except Exception as e:
+        return f"<h3>Error rendering template: {e}</h3>"
 
 @app.route('/download_excel')
 def download_excel():
-    save_to_excel()
+    try:
+        save_to_excel()
+        zip_filename = 'amazon_excel_files.zip'
+        with zipfile.ZipFile(zip_filename, 'w') as zipf:
+            for pid in scraped_data['amazon']:
+                excel_file = f"{pid}_data_amazon.xlsx"
+                if os.path.exists(excel_file):
+                    zipf.write(excel_file)
 
-    zip_filename = 'amazon_excel_files.zip'
-    with zipfile.ZipFile(zip_filename, 'w') as zipf:
-        for pid in scraped_data['amazon']:
-            excel_file = f"{pid}_data_amazon.xlsx"
-            if os.path.exists(excel_file):
-                zipf.write(excel_file)
-
-    return send_file(zip_filename, as_attachment=True)
-
-
-@app.route('/redirect_main_page')
-def redirect_main_page():
-    session.clear()
-    return redirect(url_for('index'))
-
+        return send_file(zip_filename, as_attachment=True)
+    except Exception as e:
+        return f"<h3>Error generating ZIP file: {e}</h3>"
 
 if __name__ == '__main__':
     app.run(debug=True)
