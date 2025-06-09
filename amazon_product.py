@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time
 
@@ -20,8 +21,7 @@ def get_amazon_product_details(product_id):
     options.add_argument("user-agent=Mozilla/5.0")
 
     # Set ChromeDriver path (update this)
-    service = Service(executable_path="chromedriver-win64/chromedriver.exe")
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     url = f"https://www.amazon.in/dp/{product_id}"
 
