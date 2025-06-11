@@ -22,6 +22,9 @@ def get_amazon_product_details(product_id):
     options.add_argument("user-agent=Mozilla/5.0")
 
     # Set ChromeDriver path (update this)
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    service = Service(
+        executable_path=("chromedriver-win64/chromedriver.exe"))
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     url = f"https://www.amazon.in/dp/{product_id}"
