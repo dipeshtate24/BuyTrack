@@ -16,7 +16,7 @@ app = Flask(__name__)
 def get_amazon_product_details(product_id):
     # Set Chrome options
     options = Options()
-    options.binary_location = "/usr/bin/google-chrome"  # Chrome installed path on Render
+    options.binary_location = os.path.join(os.getcwd(), 'chromedriver-linux64', 'chromedriver')
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
