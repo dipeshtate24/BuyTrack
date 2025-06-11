@@ -16,7 +16,7 @@ app = Flask(__name__)
 def get_amazon_product_details(product_id):
     # Set Chrome options
     options = Options()
-    options.binary_location = os.path.join(os.getcwd(), 'chromedriver-linux64', 'chromedriver')
+    options.binary_location = os.path.join('chromedriver-linux64', 'chromedriver')
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -29,7 +29,7 @@ def get_amazon_product_details(product_id):
     # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     # Use chromedriver from your repo
-    chromedriver_path = os.path.join(os.getcwd(), "chromedriver-win64", "chromedriver")
+    chromedriver_path = os.path.join("chromedriver-win64", "chromedriver")
     service = Service(chromedriver_path)
 
     driver = webdriver.Chrome(service=service, options=options)
