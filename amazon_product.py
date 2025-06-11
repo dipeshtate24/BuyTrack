@@ -23,9 +23,15 @@ def get_amazon_product_details(product_id):
 
     # Set ChromeDriver path (update this)
     # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    service = Service(
-        executable_path=("chromedriver-win64/chromedriver.exe"))
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # service = Service(
+    #     executable_path=("chromedriver-win64/chromedriver.exe"))
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    # Use chromedriver from your repo
+    chromedriver_path = os.path.join(os.getcwd(), "chromedriver-win64", "chromedriver")
+    service = Service(chromedriver_path)
+
+    driver = webdriver.Chrome(service=service, options=options)
 
     url = f"https://www.amazon.in/dp/{product_id}"
 
