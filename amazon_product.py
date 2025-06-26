@@ -28,9 +28,12 @@ def get_amazon_product_details(product_id):
     #     executable_path=("chromedriver-win64/chromedriver.exe"))
     # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-    # Use chromedriver from your repo
-    chromedriver_path = os.path.join("chromedriver-win64", "chromedriver")
-    service = Service(chromedriver_path)
+    # # Use chromedriver from your repo
+    # chromedriver_path = os.path.join("chromedriver-win64", "chromedriver")
+    # service = Service(chromedriver_path)
+
+    # Path to ChromeDriver installed in build.sh
+    service = Service('/usr/local/bin/chromedriver')
 
     driver = webdriver.Chrome(service=service, options=options)
 
